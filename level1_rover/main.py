@@ -1,61 +1,44 @@
 import math
 
-def calculate_rover_motion():
-    print("--- Rover Navigation System: Task 1 ---")
-    
-    try:
-    
-        x1 = float(input("Enter Origin X1: "))
-        y1 = float(input("Enter Origin Y1: "))
-        x2 = float(input("Enter Destination X2: "))
-        y2 = float(input("Enter Destination Y2: "))
+# --- STEP 1: DISTANCE CALCULATION ---
+print("--- Rover Navigation: Task 1 ---")
+x1 = float(input("Origin X1: "))
+y1 = float(input("Origin Y1: "))
+x2 = float(input("Destination X2: "))
+y2 = float(input("Destination Y2: "))
 
-        distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-        
-   
-        v0 = float(input("Enter Initial Velocity (m/s): "))
-        a = float(input("Enter Acceleration (m/s^2): "))
-        v_max = float(input("Enter Top Speed (m/s): "))
+# Euclidean distance: sqrt(dx^2 + dy^2)
+dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
-        
-        if a <= 0 and v0 == 0:
-            print("Error: Rover cannot move with zero acceleration and zero initial velocity.")
-            return
-        if distance < 0 or v0 < 0 or v_max < 0:
-            print("Error: Distance and velocity values must be non-negative.")
-            return
+# --- STEP 2: PHYSICS INPUTS ---
+v0 = float(input("Initial Velocity (m/s): "))
+a = float(input("Acceleration (m/s^2): "))
+v_max = float(input("Top Speed (m/s): "))
 
-        
-        if a > 0:
-            t_accel = (v_max - v0) / a
-          
-            d_accel = (v0 * t_accel) + (0.5 * a * (t_accel**2))
-        else:
-            t_accel = 0
-            d_accel = 0
+# --- STEP 3: ACCELERATION PHASE ---
+if a > 0:
+    # Time and distance needed to reach top speed
+    t_to_max = (v_max - v0) / a
+    d_accel = (v0 * t_to_max) + (0.5 * a * (t_to_max**2))
+else:
+    t_to_max = 0
+    d_accel = 0
 
-        if d_accel >= distance:
-           
-            if a > 0:
-               
-                t_total = (-v0 + math.sqrt(v0**2 + 2 * a * distance)) / a
-            else:
-                t_total = distance / v0
-        else:
-           
-            d_remaining = distance - d_accel
-            t_cruise = d_remaining / v_max
-            t_total = t_accel + t_cruise
+# --- STEP 4: MOTION LOGIC ---
+if d_accel >= dist:
+    # Scenario: Destination reached while still accelerating
+    if a > 0:
+        # Solve quadratic: d = v0t + 0.5at^2
+        total_time = (-v0 + math.sqrt(v0**2 + 2 * a * dist)) / a
+    else:
+        total_time = dist / v0
+else:
+    # Scenario: Reaches top speed then cruises at constant velocity
+    remaining_dist = dist - d_accel
+    t_cruise = remaining_dist / v_max
+    total_time = t_to_max + t_cruise
 
-      
-        print("\n--- Results ---")
-        print(f"Distance to destination: {distance:.2f} m")
-        print(f"Time required: {t_total:.2f} seconds")
-
-    except ValueError:
-        print("Error: Please enter valid numerical values.")
-    except ZeroDivisionError:
-        print("Error: Division by zero encountered. Check acceleration and velocity inputs.")
-
-if __name__ == "__main__":
-    calculate_rover_motion()
+# --- STEP 5: OUTPUT ---
+print("\n--- TRAVEL SUMMARY ---")
+print(f"Total distance: {dist:.2f} m")
+print(f"Total time: {total_time:.2f} seconds")
